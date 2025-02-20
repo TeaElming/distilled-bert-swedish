@@ -6,6 +6,7 @@ from transformers import (
     TrainingArguments,
     Trainer
 )
+import torch
 
 ##########################################################
 # 1. Load Each Dataset
@@ -51,15 +52,12 @@ def tokenize_fn(examples):
         max_length=128
     )
 
-# Tokenize all splits
 tokenized_dataset = dataset.map(tokenize_fn, batched=True)
 
-# Rename 'label' -> 'labels' if needed
 for split in ["train", "validation", "test"]:
     if "label" in tokenized_dataset[split].column_names:
         tokenized_dataset[split] = tokenized_dataset[split].rename_column("label", "labels")
 
-# Set PyTorch format
 tokenized_dataset.set_format("torch", columns=["input_ids", "attention_mask", "labels"])
 
 ##########################################################
@@ -73,7 +71,9 @@ model = AutoModelForSequenceClassification.from_pretrained(
 ##########################################################
 # 5. Training Setup
 ##########################################################
+import evaluate
 accuracy_metric = evaluate.load("accuracy")
+
 def compute_metrics(eval_preds):
     logits, labels = eval_preds
     preds = logits.argmax(dim=-1)
@@ -81,14 +81,29 @@ def compute_metrics(eval_preds):
 
 training_args = TrainingArguments(
     output_dir="./albert-sentiment-finetuned",
+
+    # Increase parallel data loading
+    dataloader_num_workers=4,
+
+    # Mixed precision training on NVIDIA GPUs
+    fp16=True,
+
+    # Possibly enable gradient checkpointing (less VRAM usage, can allow bigger batch)
+    gradient_checkpointing=False,
+
+    # If you have plenty of VRAM, you could try bigger batches:
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
+
     num_train_epochs=3,
     evaluation_strategy="epoch",
     save_strategy="epoch",
     logging_steps=50,
     logging_dir="./logs",
     load_best_model_at_end=True,
+
+    # You can also try an alternative optimizer:
+    optim="adamw_torch",  # or "adamw_hf"
 )
 
 trainer = Trainer(
@@ -104,14 +119,11 @@ trainer = Trainer(
 # 6. Train & Evaluate
 ##########################################################
 trainer.train()
-
 test_results = trainer.evaluate(tokenized_dataset["test"])
 print("Test Accuracy:", test_results["eval_accuracy"])
 
 ##########################################################
-# 7. Save the Final Model
+# 7. Save Final Model
 ##########################################################
 trainer.save_model("./albert-sentiment-finetuned")
 tokenizer.save_pretrained("./albert-sentiment-finetuned")
-
-print("All done - trained on all datasets in one go!")
