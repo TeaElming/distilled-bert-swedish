@@ -1,0 +1,60 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "text": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "label": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "a0": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "a1": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "a3": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "a4": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "a6": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "a7": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "a8": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "a9": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "a10": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "a11": {
+      "dtype": "float64",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}
